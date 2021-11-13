@@ -1,20 +1,17 @@
-# Docs https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-configure
-# Docs https://docs.microsoft.com/en-us/azure/storage/common/storage-ref-azcopy?toc=/azure/storage/blobs/toc.json
-# Docs https://docs.microsoft.com/en-us/azure/storage/common/storage-ref-azcopy-list
-# Docs 
+# Docs  
 
 # Defines the values for the resource's Ensure property.
 enum Ensure
 {
-    # The resource must be absent.    
+    # The resource must be absent.
     Absent
-    # The resource must be present.    
+    # The resource must be present.
     Present
 }
 
 # [DscResource()] indicates the class is a DSC resource.
 [DscResource()]
-class AppReleaseDSC
+class EnvironmentDSC
 {
     # The build componentname being released
     [DscProperty(Key)]
@@ -203,7 +200,7 @@ class AppReleaseDSC
     }
 
     # Gets the resource's current state.
-    [AppReleaseDSC] Get()
+    [EnvironmentDSC] Get()
     {
         # Return this instance or construct a new instance.
         return $this

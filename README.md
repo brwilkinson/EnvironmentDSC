@@ -1,15 +1,7 @@
-# AppReleaseDSC
-Invoke App Releases via DSC
+# EnvironmentDSC
+Create Environment Variables via DSC, from Keyvault secrets.
 
-This works in conjunction with: [brwilkinson/PlatformRelease](https://github.com/brwilkinson/PlatformRelease)
-- brwilkinson/PlatformRelease [The Build tools]
-- brwilkinson/AppReleaseDSC   [The Release tools - Pull Mode]
-
-PowerShell AZCOPY + App Release DSC __Class based Resource__
-
-This is a DSC Resource for performing File sync tasks with Azure File Shares
-
-[azcopy sync /?](https://docs.microsoft.com/en-us/azure/storage/common/storage-ref-azcopy-sync)
+PowerShell Set Environement Variables __Class based Resource__
 
 __Requirements__
 * PowerShell Version 5.0 +
