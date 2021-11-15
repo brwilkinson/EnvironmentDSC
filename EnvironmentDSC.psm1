@@ -9,17 +9,8 @@ enum Ensure
     Present
 }
 
-# Defines the values for the resource's Ensure property.
-enum Scope
-{
-    # The Machine scope.
-    Machine
-    # The User scope.
-    User
-}
-
 # [DscResource()] indicates the class is a DSC resource.
-[DscResource()]
+[DscResource(RunAsCredential='NotSupported')]
 class EnvironmentDSC
 {
     # The Environment variable Name
@@ -27,15 +18,15 @@ class EnvironmentDSC
     [string]$Name
 
     # The target environment scope to be used
-    [DscProperty(Key)]
-    [Scope]$Scope = [Scope]::Machine
+    # [DscProperty()]
+    # [System.EnvironmentVariableTarget]$Scope = [System.EnvironmentVariableTarget]::Machine
 
     # Should have 'Key Vault Secrets User'
     [DscProperty(Mandatory)]
     [string]$ManagedIdentityClientID
 
     # The KeyVaultName to pull the secrets
-    [DscProperty()]
+    [DscProperty(Mandatory)]
     [string]$KeyVaultName
 
     # The KeyVaultURI to pull the secrets
@@ -51,7 +42,7 @@ class EnvironmentDSC
         try
         {
             # Test if the Env var is set for the desired Scope
-            $exists = [System.Environment]::GetEnvironmentVariable($this.Name, $this.Scope)
+            $exists = [System.Environment]::GetEnvironmentVariable($this.Name, 'Machine')
             if (! ($exists))
             {
                 return $false
@@ -83,8 +74,8 @@ class EnvironmentDSC
     [void] Set()
     {
         $this.KeyVaultURI = 'https://{0}.vault.azure.net' -f $this.KeyVaultName
-        Write-Verbose -Message "Settings Environment variable [$($this.Name)] at scope [$($this.Scope)]"
-        [System.Environment]::SetEnvironmentVariable($this.Name, $this.GetSecretValue(), $this.Scope)
+        Write-Verbose -Message "Settings Environment variable [$($this.Name)] at scope [$('Machine')]"
+        [System.Environment]::SetEnvironmentVariable($this.Name, $this.GetSecretValue(), 'Machine')
     }
 
     # Gets the resource's current state.
