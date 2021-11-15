@@ -10,7 +10,7 @@ enum Ensure
 }
 
 # [DscResource()] indicates the class is a DSC resource.
-[DscResource(RunAsCredential='NotSupported')]
+[DscResource(RunAsCredential = 'NotSupported')]
 class EnvironmentDSC
 {
     # The Environment variable Name
@@ -47,22 +47,20 @@ class EnvironmentDSC
             {
                 return $false
             }
-            else
+
+            # Test if the value exists in the KeyVaultName
+            if ($this.GetSecrets() -notcontains $this.Name)
             {
-                # Test if the value exists in the KeyVaultName
-                if ($this.GetSecrets() -notcontains $this.Name)
-                {
-                    throw "Create secret [$($this.Name)] in Keyvault [$($this.KeyVaultName)]"
-                }
-
-                # Test if the Environment value, matches the Keyvault value
-                if ($exists -ne $this.GetSecretValue())
-                {
-                    return $false
-                }
-
-                return $true
+                throw "Create secret [$($this.Name)] in Keyvault [$($this.KeyVaultName)]"
             }
+
+            # Test if the Environment value, matches the Keyvault value
+            if ($exists -ne $this.GetSecretValue())
+            {
+                return $false
+            }
+
+            return $true
         }
         catch
         {
@@ -73,7 +71,6 @@ class EnvironmentDSC
     # Sets the desired state of the resource.
     [void] Set()
     {
-        $this.KeyVaultURI = 'https://{0}.vault.azure.net' -f $this.KeyVaultName
         Write-Verbose -Message "Settings Environment variable [$($this.Name)] at scope [$('Machine')]"
         [System.Environment]::SetEnvironmentVariable($this.Name, $this.GetSecretValue(), 'Machine')
     }
