@@ -7,86 +7,42 @@ __Requirements__
 * PowerShell Version 5.0 +
 * Server 2012 +
 
-This is the componentbuild.json metadata file that stores all of your build/release info
-You have all of your components in there you update this file when you run your build/release pipeline
-You do a git checkout of the file, update the value for the individual component/environment
-Then you check it into the git repo, then you copy it to the storage URI
-DSC will read this file to know which version to install via the DSC Module.
-
-```json
-{
-    "ComponentName": {
-        "LogHeadersAPI": {
-            "D": {
-                "DefaultBuild": "0.1.0"
-            },
-            "Q": {
-                "DefaultBuild": "0.1.0"
-            },
-            "T": {
-                "DefaultBuild": "0.1.0"
-            },
-            "U": {
-                "DefaultBuild": "0.1.0"
-            },
-            "P": {
-                "DefaultBuild": "0.1.0"
-            }
-        }
-    }
-}
-```
-
-I provided a sample with all values passed in, however I would recommend that you set some of the file names as your defaults 
+Sample with all values passed in, however I would recommend that you set some of the file names as your defaults 
 IN the DSC Module, then you don't need to specify them for each component
 
 ```powershell
     # sample configuation data
 
-            # Blob copy with Managed Identity - Oauth2
-            AppReleaseDSCAppPresent     = @(
-
-                @{
-                    ComponentName     = 'LogHeadersAPI'
-                    SourcePathBlobURI = 'https://{0}.blob.core.windows.net/builds/'
-                    DestinationPath   = 'F:\WEB\'
-                    ValidateFileName  = 'CurrentBuild.txt'
-                    BuildFileName     = 'F:\Build\LogHeadersAPI\ComponentBuild.json'
-                    SleepTime         = '10'
-                }
+            # KV Secrests Get with Managed Identity - Oauth2
+            EnvironmentVarSet           = @(
+                @{ Name = 'BotName'; KVName = 'kvglobal'},
+                @{ Name = 'AadAppId'; KVName = 'kvglobal'},
+                @{ Name = 'AadAppSecret'; KVName = 'kvglobal'},
+                @{ Name = 'ServiceDnsName'; KVName = 'kvglobal'}
             )
 ```
 
 
 ```powershell
-
-
 Configuration AppServers
 {
     Param (
-        [String]$StorageAccountName,
-        [String]$clientIDGlobal
+        [String]$Deployment,
+        [String]$clientIDLocal
     )
 
     node $AllNodes.NodeName
     {
         #-------------------------------------------------------------------
-        foreach ($AppComponent in $Node.AppReleaseDSCAppPresent)
+        foreach ($EnvVar in $Node.EnvironmentVarSet)
         {
-            AppReleaseDSC $AppComponent.ComponentName
+            EnvironmentDSC $EnvVar.Name
             {
-                ComponentName           = $AppComponent.ComponentName
-                SourcePath              = ($AppComponent.SourcePathBlobURI -f $StorageAccountName)
-                DestinationPath         = $AppComponent.DestinationPath
-                ValidateFileName        = $AppComponent.ValidateFileName
-                BuildFileName           = $AppComponent.BuildFileName
-                EnvironmentName         = $environment[0]
-                Ensure                  = 'Present'
+                Name                    = $EnvVar.Name
+                KeyVaultName            = $EnvVar.KVName
                 ManagedIdentityClientID = $clientIDGlobal
-                LogDir                  = 'F:\azcopy_logs'
-                DeploySleepWaitSeconds  = $AppComponent.SleepTime
             }
-            $dependsonAZCopyDSCDir += @("[AppReleaseDSC]$($AppComponent.ComponentName)")
+            $dependsonEnvironmentDSC += @("[EnvironmentDSC]$($EnvVar.Name)")
         }
 ```
 
@@ -103,18 +59,15 @@ As well as using DSC in Pull Mode, you can also invoke the release as part of yo
 So you get the benefit of a push or pull model, you can deploy via DSC for initial deployments,
 Then you perform updates  via push.
 
-
 ```powershell
-$ht = @{
-    ComponentName           = 'LogHeadersAPI'
-    SourcePath              = 'https://storage01.blob.core.windows.net/builds/'
-    DestinationPath         = 'F:\WEB'
-    EnvironmentName         = 'D'
-    ValidateFileName        = 'CurrentBuild.txt'
-    BuildFileName           = 'F:\Build\ComponentBuild.json'
-    Ensure                  = 'Present'
-    ManagedIdentityClientID = '219fa169-9031-49cc-b4cb-1850bc5bf6b4'
-    LogDir                  = 'F:\azcopy_logs'
-}
+$EnvironmentVarSet = @(
+    @{ Name = 'BotName'; KVName = 'kvglobal'},
+    @{ Name = 'AadAppId'; KVName = 'kvglobal'},
+    @{ Name = 'AadAppSecret'; KVName = 'kvglobal'},
+    @{ Name = 'ServiceDnsName'; KVName = 'kvglobal'}
+    )
 
-Invoke-DscResource -Name AppReleaseDSC -Method Set -ModuleName AppReleaseDSC -Property $ht -Verbose
+$EnvironmentVarSet | foreach {
+
+    Invoke-DscResource -Name EnvironmentDSC -Method Set -ModuleName EnvironmentDSC -Property $_ -Verbose
+}
