@@ -60,14 +60,26 @@ So you get the benefit of a push or pull model, you can deploy via DSC for initi
 Then you perform updates  via push.
 
 ```powershell
-$EnvironmentVarSet = @(
-    @{ Name = 'BotName'; KVName = 'kvglobal'},
-    @{ Name = 'AadAppId'; KVName = 'kvglobal'},
-    @{ Name = 'AadAppSecret'; KVName = 'kvglobal'},
-    @{ Name = 'ServiceDnsName'; KVName = 'kvglobal'}
-    )
+$Properties = @{ Name = 'BotName'; KVName = 'acu1-brw-bot-d1-kvglobal'; ManagedIdentityClientID = '47931453-e79d-4d91-bd73-d863f838e28a'}
 
-$EnvironmentVarSet | foreach {
+Invoke-DscResource -Name EnvironmentDSC -Method GET -ModuleName EnvironmentDSC -Property $Properties -Verbose
 
-    Invoke-DscResource -Name EnvironmentDSC -Method Set -ModuleName EnvironmentDSC -Property $_ -Verbose
-}
+Scope                   : Machine
+Ensure                  : Present
+Name                    : BotName
+ManagedIdentityClientID : 47931453-e79d-4d91-bd73-d863f838e28a
+KeyVaultName            : acu1-brw-bot-d1-kvglobal
+KeyVaultURI             : https://acu1-brw-bot-d1-kvglobal.vault.azure.net
+
+Invoke-DscResource -Name EnvironmentDSC -Method Test -ModuleName EnvironmentDSC -Property $Properties -Verbose
+
+InDesiredState
+--------------
+         False
+
+Invoke-DscResource -Name EnvironmentDSC -Method Set -ModuleName EnvironmentDSC -Property $Properties -Verbose
+
+RebootRequired
+--------------
+         False
+```

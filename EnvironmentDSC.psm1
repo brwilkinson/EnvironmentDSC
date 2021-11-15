@@ -82,6 +82,7 @@ class EnvironmentDSC
     # Sets the desired state of the resource.
     [void] Set()
     {
+        $this.KeyVaultURI = 'https://{0}.vault.azure.net' -f $this.KeyVaultName
         Write-Verbose -Message "Settings Environment variable [$($this.Name)] at scope [$($this.Scope)]"
         [System.Environment]::SetEnvironmentVariable($this.Name, $this.GetSecretValue(), $this.Scope)
     }
@@ -97,7 +98,6 @@ class EnvironmentDSC
     [hashtable] GetTokenParams()
     {
         Write-Verbose -Message "Retrieve Managed Identity token for Identity: [$($this.ManagedIdentityClientID)]"
-        # -------- MSI lookup for user assigned managed identity
         $Params = @{
             UseBasicParsing = $true
             Uri             = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&client_id=$($this.ManagedIdentityClientID)&resource=https://vault.azure.net"
@@ -106,7 +106,7 @@ class EnvironmentDSC
         }
         $response = Invoke-WebRequest @Params
         $ArmToken = $response.Content | ConvertFrom-Json | ForEach-Object access_token
-        $Params = @{ 
+        $Params = @{
             UseBasicParsing = $true
             ContentType     = 'application/json'
             ErrorAction     = 'Stop'
@@ -120,8 +120,9 @@ class EnvironmentDSC
     [string[]] GetSecrets()
     {
         $params = $this.GetTokenParams()
-        $kvUrl = $this.KeyVaultURI
-        Write-Verbose -Message "List Keyvault Secrets from vault [$($kvUrl)]"
+        $kvUrl = $this.Get().KeyVaultURI
+        $this.KeyVaultURI = 'https://{0}.vault.azure.net' -f $this.KeyVaultName
+        Write-Verbose -Message "List Keyvault Secrets from vault [$kvUrl]"
         $result = Invoke-WebRequest @params -Method GET -Uri "$kvUrl/secrets/?api-version=7.2" |
             ConvertFrom-Json | ForEach-Object Value | ForEach-Object id | Split-Path -Leaf
         return $result
@@ -130,9 +131,9 @@ class EnvironmentDSC
     [string] GetSecretValue()
     {
         $params = $this.GetTokenParams()
-        $kvUrl = $this.KeyVaultURI
+        $kvUrl = $this.Get().KeyVaultURI
         $secretName = $this.Name
-        Write-Verbose -Message "List Keyvault Secrets from vault [$($kvUrl)]"
+        Write-Verbose -Message "List Keyvault Secret value [$secretName] from vault [$kvUrl]"
         $result = Invoke-WebRequest @params -Method GET -Uri "$kvUrl/secrets/${secretName}?api-version=7.2" |
             ConvertFrom-Json | ForEach-Object Value
         return $result
