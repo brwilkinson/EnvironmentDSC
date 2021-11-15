@@ -62,7 +62,7 @@ Then you perform updates  via push.
 ```powershell
 $Properties = @{ Name = 'BotName'; KVName = 'acu1-brw-bot-d1-kvglobal'; ManagedIdentityClientID = '47931453-e79d-4d91-bd73-d863f838e28a'}
 
-Invoke-DscResource -Name EnvironmentDSC -Method GET -ModuleName EnvironmentDSC -Property $Properties -Verbose
+Invoke-DscResource -Name EnvironmentDSC -Method GET -ModuleName EnvironmentDSC -Property $Properties
 
 Scope                   : Machine
 Ensure                  : Present
@@ -71,13 +71,13 @@ ManagedIdentityClientID : 47931453-e79d-4d91-bd73-d863f838e28a
 KeyVaultName            : acu1-brw-bot-d1-kvglobal
 KeyVaultURI             : https://acu1-brw-bot-d1-kvglobal.vault.azure.net
 
-Invoke-DscResource -Name EnvironmentDSC -Method Test -ModuleName EnvironmentDSC -Property $Properties -Verbose
+Invoke-DscResource -Name EnvironmentDSC -Method Test -ModuleName EnvironmentDSC -Property $Properties
 
 InDesiredState
 --------------
          False
 
-Invoke-DscResource -Name EnvironmentDSC -Method Set -ModuleName EnvironmentDSC -Property $Properties -Verbose
+Invoke-DscResource -Name EnvironmentDSC -Method Set -ModuleName EnvironmentDSC -Property $Properties
 
 RebootRequired
 --------------
