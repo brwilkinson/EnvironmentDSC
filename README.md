@@ -55,9 +55,9 @@ Full sample available here
 
 ## Invoke the resource directly to sync the files
 
-As well as using DSC in Pull Mode, you can also invoke the release as part of your Release Pipeline directly
-So you get the benefit of a push or pull model, you can deploy via DSC for initial deployments,
-Then you perform updates  via push.
+As well as using DSC in Pull Mode, you can also invoke the resource as part of your Release Pipeline directly
+This would be useful to push out a Secret Rotation, where the DSC configuration settings do not change,
+however the secret value in the keyvault was updated.
 
 ```powershell
 $Properties = @{ Name = 'BotName'; KVName = 'acu1-brw-bot-d1-kvglobal'; ManagedIdentityClientID = '47931453-e79d-4d91-bd73-d863f838e28a'}
