@@ -7,18 +7,23 @@ __Requirements__
 * PowerShell Version 5.0 +
 * Server 2012 +
 
-Sample with all values passed in, however I would recommend that you set some of the file names as your defaults 
-IN the DSC Module, then you don't need to specify them for each component
+Sample with all values passed in, however I would recommend that you set some as defaults, such as:
+- Prefix
+- KVName
+
+Prefix is optional.
+Prefix should not be part of the keyvault Name, it's only added to the Environment Variable name:
+- Defines the category or grouping of the Environment variable.
 
 ```powershell
     # sample configuation data
 
             # KV Secrests Get with Managed Identity - Oauth2
             EnvironmentVarSet           = @(
-                @{ Name = 'BotName'; KVName = 'kvglobal'},
-                @{ Name = 'AadAppId'; KVName = 'kvglobal'},
-                @{ Name = 'AadAppSecret'; KVName = 'kvglobal'},
-                @{ Name = 'ServiceDnsName'; KVName = 'kvglobal'}
+                @{ Name = 'BotName';        Prefix = 'AzureSettings:'; KVName = 'kvglobal'},
+                @{ Name = 'AadAppId';       Prefix = 'AzureSettings:'; KVName = 'kvglobal'},
+                @{ Name = 'AadAppSecret';   Prefix = 'AzureSettings:'; KVName = 'kvglobal'},
+                @{ Name = 'ServiceDnsName'; Prefix = 'AzureSettings:'; KVName = 'kvglobal'}
             )
 ```
 
@@ -39,6 +44,7 @@ Configuration AppServers
             EnvironmentDSC $EnvVar.Name
             {
                 Name                    = $EnvVar.Name
+                Prefix                  = $EnvVar.Prefix
                 KeyVaultName            = $EnvVar.KVName
                 ManagedIdentityClientID = $clientIDGlobal
             }

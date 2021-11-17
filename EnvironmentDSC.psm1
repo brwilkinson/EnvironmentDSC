@@ -17,6 +17,10 @@ class EnvironmentDSC
     [DscProperty(Key)]
     [string]$Name
 
+    # The Prefix for the Environment variable Name
+    [DscProperty()]
+    [string]$Prefix
+
     # The target environment scope to be used
     # [DscProperty()]
     # [System.EnvironmentVariableTarget]$Scope = [System.EnvironmentVariableTarget]::Machine
@@ -42,7 +46,8 @@ class EnvironmentDSC
         try
         {
             # Test if the Env var is set for the desired Scope
-            $exists = [System.Environment]::GetEnvironmentVariable($this.Name, 'Machine')
+            $VarName = "{0}$($this.Name)" -f $this.Prefix
+            $exists = [System.Environment]::GetEnvironmentVariable($VarName, 'Machine')
             if (! ($exists))
             {
                 return $false
@@ -71,8 +76,9 @@ class EnvironmentDSC
     # Sets the desired state of the resource.
     [void] Set()
     {
-        Write-Verbose -Message "Settings Environment variable [$($this.Name)] at scope [$('Machine')]"
-        [System.Environment]::SetEnvironmentVariable($this.Name, $this.GetSecretValue(), 'Machine')
+        $VarName = "{0}$($this.Name)" -f $this.Prefix
+        Write-Verbose -Message "Settings Environment variable [$VarName] at scope [$('Machine')]"
+        [System.Environment]::SetEnvironmentVariable($VarName, $this.GetSecretValue(), 'Machine')
     }
 
     # Gets the resource's current state.
