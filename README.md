@@ -55,9 +55,9 @@ Configuration AppServers
 Full sample available here
 
 - DSC Configuration
-    - [ADF/ext-DSC/DSC-AppServers.ps1](https://github.com/brwilkinson/AzureDeploymentFramework/blob/main/ADF/ext-DSC/DSC-AppServers.ps1#L448)
+    - [ADF/ext-DSC/DSC-BotServers.ps1](https://github.com/brwilkinson/AzureDeploymentFramework/blob/main/ADF/ext-DSC/DSC-BotServers.ps1#L167)
 - DSC ConfigurationData
-    - [ADF/ext-CD/JMP-ConfigurationData.psd1](https://github.com/brwilkinson/AzureDeploymentFramework/blob/main/ADF/ext-CD/API-ConfigurationData.psd1#L182)
+    - [ADF/ext-CD/BOT-ConfigurationData.psd1](https://github.com/brwilkinson/AzureDeploymentFramework/blob/main/ADF/ext-CD/BOT-ConfigurationData.psd1#L81)
 
 ## Invoke the resource directly to sync the files
 
